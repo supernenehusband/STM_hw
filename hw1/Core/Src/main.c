@@ -76,8 +76,8 @@ const osThreadAttr_t myTask01_attributes = {
   .priority = (osPriority_t) osPriorityNormal1,
 };
 /* USER CODE BEGIN PV */
-osMessageQueueId_t buttonQueue;  // Queue 用來傳遞短按/長按訊號
-osMutexId_t ledMutex;  // Mutex 確保 LED2 只被一個 Task 控制
+osMessageQueueId_t buttonQueue;
+osMutexId_t ledMutex;
 uint8_t ledToggleState = 0;
 /* USER CODE END PV */
 
@@ -720,7 +720,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void TimerCallback(void *argument)
 {
-    osThreadFlagsSet(myTask02Handle, 0x01);  // 設置旗標，通知 Task_2 執行
+    osThreadFlagsSet(myTask02Handle, 0x01);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -731,22 +731,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
     if (GPIO_Pin == BUTTON_EXTI13_Pin)
     {
-        if (HAL_GPIO_ReadPin(BUTTON_EXTI13_GPIO_Port, BUTTON_EXTI13_Pin) == GPIO_PIN_RESET)  // 按鈕被按下 (下降沿)
+        if (HAL_GPIO_ReadPin(BUTTON_EXTI13_GPIO_Port, BUTTON_EXTI13_Pin) == GPIO_PIN_RESET)  // button pressed
         {
-            pressTime = HAL_GetTick();  // 記錄按下時間 (ms)
+            pressTime = HAL_GetTick();
         }
-        else  // 按鈕被釋放 (上升沿)
+        else  // button released
         {
             releaseTime = HAL_GetTick();
-            if ((releaseTime - pressTime) >= 1000)  // 長按 1 秒以上
+            if ((releaseTime - pressTime) >= 1000)  // press duration >= 1 second
             {
-                buttonEvent = 2;  // 長按
+                buttonEvent = 2;  // long press
             }
             else
             {
-                buttonEvent = 1;  // 短按
+                buttonEvent = 1;  // short press
             }
-            osMessageQueuePut(buttonQueue, &buttonEvent, 0, 0);  // 傳遞按鍵事件
+            osMessageQueuePut(buttonQueue, &buttonEvent, 0, 0);
         }
     }
 }
@@ -763,8 +763,8 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	HAL_GPIO_WritePin(GPIOC, LED3_WIFI__LED4_BLE_Pin, GPIO_PIN_RESET);  // 開機時關閉 LED4
-	osThreadTerminate(defaultTaskHandle);  // 關閉這個 Task，避免影響其他 Task
+	HAL_GPIO_WritePin(GPIOC, LED3_WIFI__LED4_BLE_Pin, GPIO_PIN_RESET);
+	osThreadTerminate(defaultTaskHandle);
   /* USER CODE END 5 */
 }
 
@@ -783,15 +783,15 @@ void StartTask02(void *argument)
 	{
 		osThreadFlagsWait(0x01, osFlagsWaitAny, osWaitForever);  // wait for timer trigger
 
-		osMutexAcquire(ledMutex, osWaitForever);  // 確保不與 Task_1 衝突
+		osMutexAcquire(ledMutex, osWaitForever);  // avoid conflict with task 1
 
-		for (int i = 0; i < 40; i++)  // 10Hz 閃爍 2 秒
+		for (int i = 0; i < 40; i++)  // keep blinking in 2s with 10Hz frequency
 		{
 			HAL_GPIO_TogglePin(GPIOB, LED2_Pin);
 			osDelay(50);
 		}
 
-		osMutexRelease(ledMutex);  // 釋放 Mutex
+		osMutexRelease(ledMutex);  // releases Mutex
 	}
 
   /* USER CODE END StartTask02 */
@@ -811,10 +811,10 @@ void StartTask01(void *argument)
   /* Infinite loop */
 	for (;;)
 	{
-		osMessageQueueGet(buttonQueue, &buttonEvent, NULL, osWaitForever);  // 等待按鈕訊號
-		osMutexAcquire(ledMutex, osWaitForever);  // 確保 LED2 不會被其他 Task 影響
+		osMessageQueueGet(buttonQueue, &buttonEvent, NULL, osWaitForever);
+		osMutexAcquire(ledMutex, osWaitForever);
 
-		if (buttonEvent == 1)  // 短按：1Hz 閃爍 5 秒
+		if (buttonEvent == 1)  //short press, keep blinking in 5s with 1Hz frequency
 		{
 			for (int i = 0; i < 10; i++)
 			{
@@ -822,7 +822,7 @@ void StartTask01(void *argument)
 				osDelay(500);
 			}
 		}
-		else   // 長按：10Hz 閃爍 5 秒 /
+		else   //long press, keep blinking in 5s with 10Hz frequency
 		{
 			for (int i = 0; i < 100; i++)
 			{
@@ -831,11 +831,11 @@ void StartTask01(void *argument)
 			}
 		}
 
-		osMutexRelease(ledMutex);  // 釋放 Mutex
+		osMutexRelease(ledMutex);  // release Mutex
 	}
   /* USER CODE END StartTask01 */
 }
-//hello, world
+
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
