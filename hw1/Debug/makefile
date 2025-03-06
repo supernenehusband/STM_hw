@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (12.3.rel1)
+# Toolchain: GNU Tools for STM32 (13.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -64,8 +64,8 @@ all: main-build
 main-build: hw1_1.elf secondary-outputs
 
 # Tool invocations
-hw1_1.elf hw1_1.map: $(OBJS) $(USER_OBJS) C:\Users\zyian\Downloads\hw1_1\STM32L475VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "hw1_1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\zyian\Downloads\hw1_1\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hw1_1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+hw1_1.elf hw1_1.map: $(OBJS) $(USER_OBJS) /Users/windowsistrash/Documents/eslab/STM_hw/hw1/STM32L475VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "hw1_1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/windowsistrash/Documents/eslab/STM_hw/hw1/STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hw1_1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -822,7 +822,7 @@ void StartTask01(void *argument)
 				osDelay(500);
 			}
 		}
-		else   // 長按：10Hz 閃爍 5 秒
+		else   // 長按：10Hz 閃爍 5 秒 /
 		{
 			for (int i = 0; i < 100; i++)
 			{
@@ -835,7 +835,7 @@ void StartTask01(void *argument)
 	}
   /* USER CODE END StartTask01 */
 }
-
+//hello, world
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
