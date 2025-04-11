@@ -1765,7 +1765,7 @@ void TimerCallback(void *argument)
  8000cc6:	b082      	sub	sp, #8
  8000cc8:	af00      	add	r7, sp, #0
  8000cca:	6078      	str	r0, [r7, #4]
-    osThreadFlagsSet(myTask02Handle, 0x01);  // 設置旗標，通知 Task_2 執行
+    osThreadFlagsSet(myTask02Handle, 0x01);
  8000ccc:	4b04      	ldr	r3, [pc, #16]	@ (8000ce0 <TimerCallback+0x1c>)
  8000cce:	681b      	ldr	r3, [r3, #0]
  8000cd0:	2101      	movs	r1, #1
@@ -1798,7 +1798,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
  8000cf4:	f5b3 5f00 	cmp.w	r3, #8192	@ 0x2000
  8000cf8:	d124      	bne.n	8000d44 <HAL_GPIO_EXTI_Callback+0x60>
     {
-        if (HAL_GPIO_ReadPin(BUTTON_EXTI13_GPIO_Port, BUTTON_EXTI13_Pin) == GPIO_PIN_RESET)  // 按鈕被按下 (下降沿)
+        if (HAL_GPIO_ReadPin(BUTTON_EXTI13_GPIO_Port, BUTTON_EXTI13_Pin) == GPIO_PIN_RESET)  // button pressed
  8000cfa:	f44f 5100 	mov.w	r1, #8192	@ 0x2000
  8000cfe:	4813      	ldr	r0, [pc, #76]	@ (8000d4c <HAL_GPIO_EXTI_Callback+0x68>)
  8000d00:	f001 f85c 	bl	8001dbc <HAL_GPIO_ReadPin>
@@ -1806,14 +1806,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
  8000d06:	2b00      	cmp	r3, #0
  8000d08:	d105      	bne.n	8000d16 <HAL_GPIO_EXTI_Callback+0x32>
         {
-            pressTime = HAL_GetTick();  // 記錄按下時間 (ms)
+            pressTime = HAL_GetTick();
  8000d0a:	f000 fc5f 	bl	80015cc <HAL_GetTick>
  8000d0e:	4603      	mov	r3, r0
  8000d10:	4a0f      	ldr	r2, [pc, #60]	@ (8000d50 <HAL_GPIO_EXTI_Callback+0x6c>)
  8000d12:	6013      	str	r3, [r2, #0]
-                buttonEvent = 1;  // 短按
+                buttonEvent = 1;  // short press
             }
-            osMessageQueuePut(buttonQueue, &buttonEvent, 0, 0);  // 傳遞按鍵事件
+            osMessageQueuePut(buttonQueue, &buttonEvent, 0, 0);
         }
     }
 }
@@ -1821,21 +1821,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
             releaseTime = HAL_GetTick();
  8000d16:	f000 fc59 	bl	80015cc <HAL_GetTick>
  8000d1a:	60f8      	str	r0, [r7, #12]
-            if ((releaseTime - pressTime) >= 1000)  // 長按 1 秒以上
+            if ((releaseTime - pressTime) >= 1000)  // press duration >= 1 second
  8000d1c:	4b0c      	ldr	r3, [pc, #48]	@ (8000d50 <HAL_GPIO_EXTI_Callback+0x6c>)
  8000d1e:	681b      	ldr	r3, [r3, #0]
  8000d20:	68fa      	ldr	r2, [r7, #12]
  8000d22:	1ad3      	subs	r3, r2, r3
  8000d24:	f5b3 7f7a 	cmp.w	r3, #1000	@ 0x3e8
  8000d28:	d302      	bcc.n	8000d30 <HAL_GPIO_EXTI_Callback+0x4c>
-                buttonEvent = 2;  // 長按
+                buttonEvent = 2;  // long press
  8000d2a:	2302      	movs	r3, #2
  8000d2c:	72fb      	strb	r3, [r7, #11]
  8000d2e:	e001      	b.n	8000d34 <HAL_GPIO_EXTI_Callback+0x50>
-                buttonEvent = 1;  // 短按
+                buttonEvent = 1;  // short press
  8000d30:	2301      	movs	r3, #1
  8000d32:	72fb      	strb	r3, [r7, #11]
-            osMessageQueuePut(buttonQueue, &buttonEvent, 0, 0);  // 傳遞按鍵事件
+            osMessageQueuePut(buttonQueue, &buttonEvent, 0, 0);
  8000d34:	4b07      	ldr	r3, [pc, #28]	@ (8000d54 <HAL_GPIO_EXTI_Callback+0x70>)
  8000d36:	6818      	ldr	r0, [r3, #0]
  8000d38:	f107 010b 	add.w	r1, r7, #11
@@ -1864,12 +1864,12 @@ void StartDefaultTask(void *argument)
  8000d5e:	6078      	str	r0, [r7, #4]
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	HAL_GPIO_WritePin(GPIOC, LED3_WIFI__LED4_BLE_Pin, GPIO_PIN_RESET);  // 開機時關閉 LED4
+	HAL_GPIO_WritePin(GPIOC, LED3_WIFI__LED4_BLE_Pin, GPIO_PIN_RESET);
  8000d60:	2200      	movs	r2, #0
  8000d62:	f44f 7100 	mov.w	r1, #512	@ 0x200
  8000d66:	4806      	ldr	r0, [pc, #24]	@ (8000d80 <StartDefaultTask+0x28>)
  8000d68:	f001 f840 	bl	8001dec <HAL_GPIO_WritePin>
-	osThreadTerminate(defaultTaskHandle);  // 關閉這個 Task，避免影響其他 Task
+	osThreadTerminate(defaultTaskHandle);
  8000d6c:	4b05      	ldr	r3, [pc, #20]	@ (8000d84 <StartDefaultTask+0x2c>)
  8000d6e:	681b      	ldr	r3, [r3, #0]
  8000d70:	4618      	mov	r0, r3
@@ -1905,14 +1905,14 @@ void StartTask02(void *argument)
  8000d96:	2001      	movs	r0, #1
  8000d98:	f004 f8e2 	bl	8004f60 <osThreadFlagsWait>
 
-		osMutexAcquire(ledMutex, osWaitForever);  // 確保不與 Task_1 衝突
+		osMutexAcquire(ledMutex, osWaitForever);  // avoid conflict with task 1
  8000d9c:	4b0e      	ldr	r3, [pc, #56]	@ (8000dd8 <StartTask02+0x50>)
  8000d9e:	681b      	ldr	r3, [r3, #0]
  8000da0:	f04f 31ff 	mov.w	r1, #4294967295	@ 0xffffffff
  8000da4:	4618      	mov	r0, r3
  8000da6:	f004 fabd 	bl	8005324 <osMutexAcquire>
 
-		for (int i = 0; i < 40; i++)  // 10Hz 閃爍 2 秒
+		for (int i = 0; i < 40; i++)  // keep blinking in 2s with 10Hz frequency
  8000daa:	2300      	movs	r3, #0
  8000dac:	60fb      	str	r3, [r7, #12]
  8000dae:	e00a      	b.n	8000dc6 <StartTask02+0x3e>
@@ -1924,7 +1924,7 @@ void StartTask02(void *argument)
 			osDelay(50);
  8000dba:	2032      	movs	r0, #50	@ 0x32
  8000dbc:	f004 f951 	bl	8005062 <osDelay>
-		for (int i = 0; i < 40; i++)  // 10Hz 閃爍 2 秒
+		for (int i = 0; i < 40; i++)  // keep blinking in 2s with 10Hz frequency
  8000dc0:	68fb      	ldr	r3, [r7, #12]
  8000dc2:	3301      	adds	r3, #1
  8000dc4:	60fb      	str	r3, [r7, #12]
@@ -1933,7 +1933,7 @@ void StartTask02(void *argument)
  8000dca:	ddf1      	ble.n	8000db0 <StartTask02+0x28>
 		}
 
-		osMutexRelease(ledMutex);  // 釋放 Mutex
+		osMutexRelease(ledMutex);  // releases Mutex
  8000dcc:	4b02      	ldr	r3, [pc, #8]	@ (8000dd8 <StartTask02+0x50>)
  8000dce:	681b      	ldr	r3, [r3, #0]
  8000dd0:	4618      	mov	r0, r3
@@ -1959,21 +1959,21 @@ void StartTask01(void *argument)
   /* Infinite loop */
 	for (;;)
 	{
-		osMessageQueueGet(buttonQueue, &buttonEvent, NULL, osWaitForever);  // 等待按鈕訊號
+		osMessageQueueGet(buttonQueue, &buttonEvent, NULL, osWaitForever);
  8000de8:	4b1e      	ldr	r3, [pc, #120]	@ (8000e64 <StartTask01+0x84>)
  8000dea:	6818      	ldr	r0, [r3, #0]
  8000dec:	f107 010f 	add.w	r1, r7, #15
  8000df0:	f04f 33ff 	mov.w	r3, #4294967295	@ 0xffffffff
  8000df4:	2200      	movs	r2, #0
  8000df6:	f004 fbf1 	bl	80055dc <osMessageQueueGet>
-		osMutexAcquire(ledMutex, osWaitForever);  // 確保 LED2 不會被其他 Task 影響
+		osMutexAcquire(ledMutex, osWaitForever);
  8000dfa:	4b1b      	ldr	r3, [pc, #108]	@ (8000e68 <StartTask01+0x88>)
  8000dfc:	681b      	ldr	r3, [r3, #0]
  8000dfe:	f04f 31ff 	mov.w	r1, #4294967295	@ 0xffffffff
  8000e02:	4618      	mov	r0, r3
  8000e04:	f004 fa8e 	bl	8005324 <osMutexAcquire>
 
-		if (buttonEvent == 1)  // 短按：1Hz 閃爍 5 秒
+		if (buttonEvent == 1)  //short press, keep blinking in 5s with 1Hz frequency
  8000e08:	7bfb      	ldrb	r3, [r7, #15]
  8000e0a:	2b01      	cmp	r3, #1
  8000e0c:	d112      	bne.n	8000e34 <StartTask01+0x54>
@@ -2000,7 +2000,7 @@ void StartTask01(void *argument)
  8000e32:	e010      	b.n	8000e56 <StartTask01+0x76>
 			}
 		}
-		else   // 長按：10Hz 閃爍 5 秒
+		else   //long press, keep blinking in 5s with 10Hz frequency
 		{
 			for (int i = 0; i < 100; i++)
  8000e34:	2300      	movs	r3, #0
@@ -2024,12 +2024,12 @@ void StartTask01(void *argument)
 			}
 		}
 
-		osMutexRelease(ledMutex);  // 釋放 Mutex
+		osMutexRelease(ledMutex);  // release Mutex
  8000e56:	4b04      	ldr	r3, [pc, #16]	@ (8000e68 <StartTask01+0x88>)
  8000e58:	681b      	ldr	r3, [r3, #0]
  8000e5a:	4618      	mov	r0, r3
  8000e5c:	f004 faad 	bl	80053ba <osMutexRelease>
-		osMessageQueueGet(buttonQueue, &buttonEvent, NULL, osWaitForever);  // 等待按鈕訊號
+		osMessageQueueGet(buttonQueue, &buttonEvent, NULL, osWaitForever);
  8000e60:	e7c2      	b.n	8000de8 <StartTask01+0x8>
  8000e62:	bf00      	nop
  8000e64:	20000760 	.word	0x20000760
