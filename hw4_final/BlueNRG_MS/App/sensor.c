@@ -58,6 +58,7 @@ AxesRaw_t q_axes[SEND_N_QUATERNIONS] = {{0, 0, 0}};
 /* Private function prototypes -----------------------------------------------*/
 void GAP_DisconnectionComplete_CB(void);
 void GAP_ConnectionComplete_CB(uint8_t addr[6], uint16_t handle);
+extern void Attribute_Modified_CB(uint16_t handle, uint8_t data_length, uint8_t *att_data);
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -161,7 +162,16 @@ void user_notify(void * pData)
           Read_Request_CB(pr->attr_handle);
         }
         break;
+      case EVT_BLUE_GATT_WRITE_PERMIT_REQ:
+      	  {
+      		evt_gatt_write_permit_req *pr = (void*)blue_evt->data;
+      		Attribute_Modified_CB(pr->attr_handle, pr->data_length, pr->data);
+
+      	  }
+      	  break;
       }
+
+
 
     }
     break;

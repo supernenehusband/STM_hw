@@ -69,7 +69,7 @@ extern uint32_t start_time;
  * @param  None
  * @retval tBleStatus Status
  */
-tBleStatus Add_HWServW2ST_Service(void)
+tBleStatus Add_HWServW2ST_Service(void) //TODO: modify from this
 {
   tBleStatus ret;
   uint8_t uuid[16];

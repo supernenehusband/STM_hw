@@ -63,7 +63,14 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/BSP/B-L475E-IOT01A1/b_l475e_iot01a1.h \
  ../Drivers/BSP/B-L475E-IOT01A1/lsm6dsl.h \
  ../Drivers/BSP/B-L475E-IOT01A1/accelero.h \
- ../Drivers/BSP/B-L475E-IOT01A1/gyro.h
+ ../Drivers/BSP/B-L475E-IOT01A1/gyro.h \
+ ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_def.h \
+ ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_types.h \
+ ../BlueNRG_MS/App/gatt_db.h ../BlueNRG_MS/Target/bluenrg_conf.h \
+ ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_aci.h \
+ ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_server.h \
+ ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_def.h \
+ ../Middlewares/ST/BlueNRG-MS/includes/compiler.h
 ../Core/Inc/main.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 ../Core/Inc/stm32l4xx_hal_conf.h:
@@ -130,3 +137,11 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/BSP/B-L475E-IOT01A1/lsm6dsl.h:
 ../Drivers/BSP/B-L475E-IOT01A1/accelero.h:
 ../Drivers/BSP/B-L475E-IOT01A1/gyro.h:
+../Middlewares/ST/BlueNRG-MS/includes/bluenrg_def.h:
+../Middlewares/ST/BlueNRG-MS/includes/bluenrg_types.h:
+../BlueNRG_MS/App/gatt_db.h:
+../BlueNRG_MS/Target/bluenrg_conf.h:
+../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_aci.h:
+../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_server.h:
+../Middlewares/ST/BlueNRG-MS/includes/bluenrg_def.h:
+../Middlewares/ST/BlueNRG-MS/includes/compiler.h:

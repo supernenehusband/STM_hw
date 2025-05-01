@@ -1,0 +1,8 @@
+../Drivers/CMSIS/Include/FastMathFunctions/arm_cos_f32.c:71:11:arm_cos_f32	3
+../Drivers/CMSIS/Include/FastMathFunctions/arm_cos_q15.c:49:7:arm_cos_q15	2
+../Drivers/CMSIS/Include/FastMathFunctions/arm_cos_q31.c:49:7:arm_cos_q31	2
+../Drivers/CMSIS/Include/FastMathFunctions/arm_sin_f32.c:71:11:arm_sin_f32	3
+../Drivers/CMSIS/Include/FastMathFunctions/arm_sin_q15.c:49:7:arm_sin_q15	1
+../Drivers/CMSIS/Include/FastMathFunctions/arm_sin_q31.c:49:7:arm_sin_q31	1
+../Drivers/CMSIS/Include/FastMathFunctions/arm_sqrt_q15.c:50:12:arm_sqrt_q15	5
+../Drivers/CMSIS/Include/FastMathFunctions/arm_sqrt_q31.c:50:12:arm_sqrt_q31	5

@@ -24,6 +24,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32l475e_iot01_accelero.h"
+#include "bluenrg_def.h"
+#include "gatt_db.h"
+#include "bluenrg_conf.h"
+#include "bluenrg_gatt_aci.h"
+
+#include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,7 +40,9 @@ extern uint32_t g_sample_rate;     // BLE 寫入後會改變它
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ACC_SERVICE_UUID       0xAA
+#define ACC_CHAR_UUID          0x01
+#define SAMPLEFREQ_CHAR_UUID   0x02
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,7 +70,8 @@ osThreadId myTaskACCHandle;
 uint32_t myTaskACCBuffer[ 512 ];
 osStaticThreadDef_t myTaskACCControlBlock;
 /* USER CODE BEGIN PV */
-
+uint16_t AccServiceHandle, AccCharHandle, SampleFreqCharHandle;
+int16_t pDataXYZ[3];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,6 +88,108 @@ void StartTaskBLE(void const * argument);
 void StartTaskACC(void const * argument);
 
 /* USER CODE BEGIN PFP */
+//void Add_Acc_Service(void)
+//{
+//	uint8_t serviceUUID = ACC_SERVICE_UUID;
+//	uint8_t accCharUUID = ACC_CHAR_UUID;
+//	uint8_t freqCharUUID = SAMPLEFREQ_CHAR_UUID;
+//    // Add a service
+//    aci_gatt_add_serv(UUID_TYPE_16, &serviceUUID, PRIMARY_SERVICE, 7, &AccServiceHandle);
+//
+//    // Add Characteristic A: 3-axis acceleration values
+//    aci_gatt_add_char(AccServiceHandle,
+//                      UUID_TYPE_16, &accCharUUID,
+//                      6, // 3 * int16_t = 6 bytes
+//                      CHAR_PROP_NOTIFY | CHAR_PROP_READ,
+//                      ATTR_PERMISSION_NONE,
+//                      GATT_NOTIFY_ATTRIBUTE_WRITE,
+//                      16, 1,
+//                      &AccCharHandle);
+//
+//    // Add Characteristic B: Sampling frequency
+//    aci_gatt_add_char(AccServiceHandle,
+//                      UUID_TYPE_16, &freqCharUUID,
+//                      4, // uint32_t: 4 bytes
+//                      CHAR_PROP_WRITE | CHAR_PROP_WRITE_WITHOUT_RESP,
+//                      ATTR_PERMISSION_NONE,
+//                      GATT_NOTIFY_ATTRIBUTE_WRITE,
+//                      16, 1,
+//                      &SampleFreqCharHandle);
+//}
+void Add_Acc_Service(void)
+{
+    uint8_t uuid128_base[16] = {
+        0xd5, 0xa5, 0x02, 0x00, 0x36, 0xac, 0xe1, 0x11,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    // UUID for service: 0000AA00-0000-0001-11e1-ac360002a5d5
+    uuid128_base[12] = 0x00;
+    uuid128_base[13] = 0xAA;
+    aci_gatt_add_serv(UUID_TYPE_128, uuid128_base, PRIMARY_SERVICE, 7, &AccServiceHandle);
+
+    // UUID for ACC characteristic: 00000100-0000-0001-11e1-ac360002a5d5
+    uuid128_base[12] = 0x00;
+    uuid128_base[13] = 0x01;
+    aci_gatt_add_char(
+        AccServiceHandle,
+        UUID_TYPE_128, uuid128_base,
+        6, // 3 * int16_t = 6 bytes
+        CHAR_PROP_NOTIFY | CHAR_PROP_READ,
+        ATTR_PERMISSION_NONE,
+        GATT_NOTIFY_ATTRIBUTE_WRITE,
+        16, 1,
+        &AccCharHandle);
+
+//    // UUID for sampling rate characteristic: 00000101-0000-0001-11e1-ac360002a5d5
+//    uuid128_base[13] = 0x02;  // change to 0x02 for 0x0101
+//    aci_gatt_add_char(
+//        AccServiceHandle,
+//        UUID_TYPE_128, uuid128_base,
+//        4, // uint32_t: 4 bytes
+//        CHAR_PROP_WRITE | CHAR_PROP_WRITE_WITHOUT_RESP,
+//        ATTR_PERMISSION_NONE,
+//        GATT_NOTIFY_ATTRIBUTE_WRITE,
+//        16, 1,
+//        &SampleFreqCharHandle);
+    uuid128_base[12] = 0x01;
+    uuid128_base[13] = 0x01;
+    aci_gatt_add_char(
+        AccServiceHandle,
+        UUID_TYPE_128, uuid128_base,
+        4,
+        CHAR_PROP_WRITE | CHAR_PROP_WRITE_WITHOUT_RESP,
+        ATTR_PERMISSION_NONE,
+		GATT_NOTIFY_WRITE_REQ_AND_WAIT_FOR_APPL_RESP,
+        16, 1,
+        &SampleFreqCharHandle);
+}
+
+void Update_Accel_Char(int16_t *pDataXYZ)
+{
+    uint8_t notification[6];
+    notification[0] = pDataXYZ[0] & 0xFF;
+    notification[1] = (pDataXYZ[0] >> 8) & 0xFF;
+    notification[2] = pDataXYZ[1] & 0xFF;
+    notification[3] = (pDataXYZ[1] >> 8) & 0xFF;
+    notification[4] = pDataXYZ[2] & 0xFF;
+    notification[5] = (pDataXYZ[2] >> 8) & 0xFF;
+
+    aci_gatt_update_char_value(AccServiceHandle, AccCharHandle, 0, 6, notification);
+}
+void Attribute_Modified_CB(uint16_t handle, uint8_t data_length, uint8_t *att_data)
+{
+    if (handle == SampleFreqCharHandle + 1) // +1 to reach the value handle
+    {
+        g_sample_rate = (uint32_t)(att_data[0] | (att_data[1] << 8) | (att_data[2] << 16) | (att_data[3] << 24));
+
+        if (g_sample_rate == 0) g_sample_rate = 1; // avoid divide-by-zero later
+        printf("[BLE] Sample rate updated to: %lu\n", g_sample_rate);
+    }
+}
+
+
+
 
 /* USER CODE END PFP */
 
@@ -88,13 +200,13 @@ int __io_putchar(int ch){
 	return ch;
 }
 
-#include <stdio.h>
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
+
 int main(void)
 {
 
@@ -129,6 +241,13 @@ int main(void)
   MX_BlueNRG_MS_Init();
   /* USER CODE BEGIN 2 */
   BSP_ACCELERO_Init();
+  Add_Acc_Service();
+
+  // Set BLE device name and make device discoverable
+//  const char *name = "STM_IOT01A";
+
+//  aci_gatt_update_char_value(0x0001, 0x0002, 0, strlen("STM_IOT01A"), (uint8_t *)"STM_IOT01A");
+
 
   /* USER CODE END 2 */
 
@@ -695,7 +814,12 @@ void StartTaskBLE(void const * argument)
 {
   /* USER CODE BEGIN StartTaskBLE */
   /* Infinite loop */
-  for(;;)
+	for(;;)
+	  {
+	      MX_BlueNRG_MS_Process();
+//	      osDelay(10); // small delay
+	  }
+  /*for(;;)
   {
 	  MX_BlueNRG_MS_Process();
 	  int16_t pDataXYZ[3];  // <-- Declare the array here
@@ -711,7 +835,7 @@ void StartTaskBLE(void const * argument)
 	  //		printf("x: %d, y: %d, z: %d\n", pDataXYZ[0], pDataXYZ[1], pDataXYZ[2]);
 
 	  	  }
-  }
+  }*/
   /* USER CODE END StartTaskBLE */
 }
 
@@ -725,10 +849,19 @@ void StartTaskBLE(void const * argument)
 void StartTaskACC(void const * argument)
 {
   /* USER CODE BEGIN StartTaskACC */
-  for(;;)
-  {
-	    osDelay(100);
-  }
+
+
+	  for(;;)
+	  {
+//		printf("current sampling rate:%d\n", g_sample_rate);
+	    BSP_ACCELERO_AccGetXYZ(pDataXYZ); // Read accelerometer
+	    Update_Accel_Char(pDataXYZ); // Update BLE characteristic
+
+        if (g_sample_rate > 0)
+            osDelay(1000 / g_sample_rate); // according to sampling rate
+        else
+	        osDelay(100); // default if invalid
+	  }
   /* USER CODE END StartTaskACC */
 }
 
