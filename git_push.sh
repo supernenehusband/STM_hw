@@ -12,6 +12,9 @@ fi
 
 git commit -m "$msg"
 
+echo "🔄 Pulling latest changes from GitHub..."
+git pull origin main --rebase
+
 echo "🚀 Pushing to GitHub..."
 git push origin main
 

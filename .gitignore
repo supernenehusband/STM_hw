@@ -1,9 +1,9 @@
-# Python 編譯中間檔
+# Python
 __pycache__/
 *.pyc
 
-# 虛擬環境資料夾
+# Virtual environment
 .venv/
 
-# macOS 系統檔
+# macOS system files
 .DS_Store
