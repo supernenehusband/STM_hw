@@ -1,0 +1,9 @@
+# Python 編譯中間檔
+__pycache__/
+*.pyc
+
+# 虛擬環境資料夾
+.venv/
+
+# macOS 系統檔
+.DS_Store
