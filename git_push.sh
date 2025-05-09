@@ -13,9 +13,15 @@ fi
 git commit -m "$msg"
 
 echo "🔄 Pulling latest changes from GitHub..."
-git pull origin main --rebase
+if ! git pull origin main --rebase; then
+  echo "❌ Error: git pull failed. Please resolve conflicts and try again."
+  exit 1
+fi
 
 echo "🚀 Pushing to GitHub..."
-git push origin main
+if ! git push origin main; then
+  echo "❌ Error: git push failed. Please check your network or repository permissions."
+  exit 1
+fi
 
 echo "✅ Push complete!"
