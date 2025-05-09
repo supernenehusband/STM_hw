@@ -31,7 +31,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 pygame.quit()
-                os.execv(sys.executable, [sys.executable, 'final.py'])
+                os.execv(sys.executable, [sys.executable, 'FINAL_PROJECT/final.py'])
             if event.key == pygame.K_ESCAPE:
                 running = False
 

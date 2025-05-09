@@ -92,7 +92,7 @@ while running:
     # 遊戲結束條件
     if lives <= 0:
         pygame.quit()
-        os.execv(sys.executable, [sys.executable, 'game_over.py', str(score)])
+        os.execv(sys.executable, [sys.executable, 'FINAL_PROJECT/game_over.py', str(score)])
 
     # 畫出所有遊戲元素
     player.draw(game_surface)
