@@ -3,7 +3,9 @@ import pygame
 class Player:
     def __init__(self, lanes, sprite):
         self.lanes = lanes
-        self.sprite = sprite
+        self.sprite_normal = sprite
+        self.sprite_sliding = pygame.transform.scale(sprite, (30, 20))
+        self.sprite = self.sprite_normal
         self.x = lanes[1]
         self.y = 300
         self.is_jumping = False
@@ -29,7 +31,8 @@ class Player:
     def slide(self):
         if not self.is_jumping:
             self.is_sliding = True
-            self.slide_timer = 30 
+            self.slide_timer = 30
+            self.sprite = self.sprite_sliding
 
     def update(self):
         if self.is_jumping:
@@ -44,14 +47,15 @@ class Player:
             self.slide_timer -= 1
             if self.slide_timer <= 0:
                 self.is_sliding = False
+                self.sprite = self.sprite_normal
 
 
     def draw(self, screen):
-        screen.blit(self.sprite, (self.x - 15, self.y - 15))
+        rect = self.sprite.get_rect()
+        rect.center = (self.x, self.y)
+        screen.blit(self.sprite, rect.topleft)
 
     def get_rect(self):
         width = self.sprite.get_width()
-        height = self.sprite.get_height() // 2 if self.is_sliding else self.sprite.get_height()
+        height = self.sprite.get_height()
         return pygame.Rect(self.x - width // 2, self.y - height // 2, width, height)
-
-
