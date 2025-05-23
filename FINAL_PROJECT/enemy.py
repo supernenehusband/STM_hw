@@ -1,6 +1,8 @@
 import pygame
 import random
 import time
+from emblem import Emblem  
+from aplus_effect import APlusEffect  
 
 # 小怪類別（pic1）
 class Enemy:
@@ -129,12 +131,19 @@ class UFO:
 
 
 class TrapUFOManager:
-    def __init__(self, lanes, trap_sprite, ufo_sprite):
+    def __init__(self, lanes, trap_sprite, ufo_sprite, emblem_sprite, aplus_sprite):
         self.traps = [Trap(lane, trap_sprite) for lane in lanes]
         self.ufos = [UFO(lane, ufo_sprite) for lane in lanes]
         self.last_spawn_time = time.time()
         self.spawn_interval = 5
         self.mode = 'trap'  # 'trap' or 'ufo'
+
+        self.lanes = lanes
+        self.emblem = None
+        self.emblem_sprite = emblem_sprite
+        self.emblem_last_spawn = time.time()
+        self.emblem_count = 0
+        self.aplus = APlusEffect(aplus_sprite)
 
     def update(self):
         current_time = time.time()
@@ -147,9 +156,24 @@ class TrapUFOManager:
         for obj in (self.traps if self.mode == 'trap' else self.ufos):
             obj.update()
 
+        # ✅ 校徽碎片生成邏輯（每 10 秒）
+        if (self.emblem is None or not self.emblem.active) and (current_time - self.emblem_last_spawn > 10):
+            self.emblem = Emblem(self.emblem_sprite, self.lanes)
+            self.emblem_last_spawn = current_time
+
+        if self.emblem and self.emblem.active:
+            self.emblem.update()
+
+        # ✅ A+ 特效更新
+        self.aplus.update()
+
     def draw(self, screen):
         for obj in (self.traps if self.mode == 'trap' else self.ufos):
             obj.draw(screen)
+        if self.emblem and self.emblem.active:
+            self.emblem.draw(screen)
+
+        self.aplus.draw(screen)
 
     def get_collided(self, player_rect, is_jumping, is_sliding):
         for obj in (self.traps if self.mode == 'trap' else self.ufos):
@@ -163,3 +187,57 @@ class TrapUFOManager:
                     return True
         return False
 
+    def collected_emblem(self, player_rect):
+        if self.emblem and self.emblem.active and player_rect.colliderect(self.emblem.get_rect()):
+            self.emblem.active = False
+            return True
+        return False
+
+    def set_speed(self, speed):
+        for trap in self.traps:
+            trap.speed = speed
+        for ufo in self.ufos:
+            ufo.speed = speed
+
+class TSMCPowerUp:
+    def __init__(self, lanes, sprite):
+        self.lanes = lanes
+        self.sprite = sprite
+        self.x = 0
+        self.y = -60
+        self.active = False
+        self.last_spawn_time = time.time()
+        self.spawn_interval = random.uniform(25, 30)
+        self.invincible_timer = 0
+
+    def update(self):
+        current_time = time.time()
+        if not self.active and current_time - self.last_spawn_time >= self.spawn_interval:
+            self.x = random.choice(self.lanes)
+            self.y = -40
+            self.active = True
+            self.last_spawn_time = current_time
+
+        if self.active:
+            self.y += 2
+            if self.y > 400:
+                self.active = False
+
+        if self.invincible_timer > 0:
+            self.invincible_timer -= 1
+
+    def check_collision(self, player_rect):
+        if self.active:
+            rect = pygame.Rect(self.x - 20, self.y - 20, 40, 40)
+            if player_rect.colliderect(rect):
+                self.active = False
+                self.invincible_timer = 300  # 10 秒無敵
+                return True
+        return False
+
+    def is_invincible(self):
+        return self.invincible_timer > 0
+
+    def draw(self, screen):
+        if self.active:
+            screen.blit(self.sprite, (self.x - 20, self.y - 20))
