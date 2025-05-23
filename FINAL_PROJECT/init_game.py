@@ -34,4 +34,7 @@ def init_game():
     aplus_image = pygame.image.load("FINAL_PROJECT/pic/aplus.png").convert_alpha()
     aplus_sprite = pygame.transform.scale(aplus_image, (60, 60))
 
-    return screen, clock, font, enemy_sprite, player_sprite, trap_sprite, ufo_sprite, heart_full_image, heart_empty_image, background, emblem_sprite, emblem_gray_sprite, aplus_sprite
+    connect_bg_image = pygame.image.load("FINAL_PROJECT/pic/connect_background.jpeg").convert()
+    connect_bg = pygame.transform.scale(connect_bg_image, (600, 400))
+
+    return screen, clock, font, enemy_sprite, player_sprite, trap_sprite, ufo_sprite, heart_full_image, heart_empty_image, background, emblem_sprite, emblem_gray_sprite, aplus_sprite, connect_bg

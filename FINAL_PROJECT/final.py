@@ -9,11 +9,52 @@ from shake import ScreenShake
 from ble_listener import start_ble_listener
 import threading
 import queue
+from ink_overlay import InkOverlayEffect
+import random
+
 
 # 初始化所有資源（圖片、音效、螢幕等）
-screen, clock, font, enemy_sprite, player_sprite, trap_sprite, ufo_sprite, heart_full_image, heart_empty_image, background, emblem_sprite, emblem_gray_sprite, aplus_sprite = init_game()
+screen, clock, font, enemy_sprite, player_sprite, trap_sprite, ufo_sprite, heart_full_image, heart_empty_image, background, emblem_sprite, emblem_gray_sprite, aplus_sprite, connect_bg = init_game()
+wait_font = pygame.font.SysFont(None, 32)
+game_started = False
+ble_connected = False
 ble_queue = queue.Queue()
-threading.Thread(target=start_ble_listener, args=(ble_queue,), daemon=True).start()
+connected_event = threading.Event()
+threading.Thread(target=start_ble_listener, args=(ble_queue, connected_event), daemon=True).start()
+
+while not game_started:
+    screen.blit(connect_bg, (0, 0))
+
+    # 如果 BLE 傳入任何訊息，視為已連線
+    if not ble_connected and not ble_queue.empty():
+        peek = ble_queue.queue[0]
+        if peek == "connected":
+            ble_connected = True
+
+    if not ble_connected:
+        text = wait_font.render("Connecting to BLE device...", True, (255, 255, 255))
+        screen.blit(text, (100, 220))
+    else:
+        text1 = wait_font.render("Connected to BlueNRG!", True, (0, 255, 0))
+        text2 = wait_font.render("Shake to start the game", True, (255, 255, 0))
+        screen.blit(text1, (120, 180))
+        screen.blit(text2, (100, 240))
+
+        try:
+            if not ble_queue.empty():
+                cmd = ble_queue.get_nowait()
+                if cmd in ("up", "down", "left", "right"):
+                    game_started = True
+        except queue.Empty:
+            pass
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    pygame.display.flip()
+    clock.tick(30)
 
 # 跑道位置
 lanes = [200, 300, 400]
@@ -32,10 +73,17 @@ lives = 3
 score = 0
 score_timer = 0
 double_score_timer = 0
+# 新增 multiplier 初始值
+multiplier = 1.0
 
 # 初始化 HUD 與螢幕震動
 hud = HUD(font, heart_full_image, heart_empty_image, emblem_sprite, emblem_gray_sprite, lives)
 shake = ScreenShake(duration=10, intensity=5)
+ink_overlay = InkOverlayEffect(screen.get_size())
+
+# 新增：初始化墨魚汁自動觸發計時
+last_ink_time = pygame.time.get_ticks()
+next_ink_delay = random.randint(30000, 40000)
 
 running = True
 while running:
@@ -48,14 +96,28 @@ while running:
             score += 1
         score_timer = 0
 
+    # 每隔固定時間自動觸發墨魚汁效果
+    current_time = pygame.time.get_ticks()
+    if current_time - last_ink_time > next_ink_delay:
+        ink_overlay.trigger()
+        last_ink_time = current_time
+        next_ink_delay = random.randint(30000, 40000)
+        multiplier *= 1.1  # 每次觸發墨魚汁就加速
+
     # 速度調整區
-    enemy.speed = 5 + score // 50
-    trap_manager.set_speed(3 + score // 50)
-    tsmc.speed = 2 + score // 100
+    base_enemy_speed = 5
+    base_trap_speed = 3
+    base_tsmc_speed = 2
+    # 移除每 100 分加速的 multiplier 計算
+    # multiplier = 1.1 ** (score // 100)
+    enemy.speed = base_enemy_speed * multiplier
+    trap_manager.set_speed(base_trap_speed * multiplier)
+    tsmc.speed = base_tsmc_speed * multiplier
 
     # 更新震動效果
     shake.update()
     offset_x, offset_y = shake.get_offset()
+    ink_overlay.update()
 
     # 建立畫布並畫出背景與跑道
     game_surface = pygame.Surface(screen.get_size())
@@ -81,6 +143,8 @@ while running:
                 player.move_left()
             elif cmd == "right":
                 player.move_right()
+            elif cmd == "shake":
+                ink_overlay.receive_shake()
     except queue.Empty:
         pass
 
@@ -99,6 +163,8 @@ while running:
                 player.jump()
             if event.key == pygame.K_DOWN:
                 player.slide()
+            if event.key == pygame.K_s:
+                ink_overlay.receive_shake()
 
     # 更新遊戲邏輯
     player.update()
@@ -138,6 +204,7 @@ while running:
             else:
                 score += 50
             trap_manager.aplus.start()  # ✅ 啟動 A+ 特效動畫
+            ink_overlay.trigger()
 
     # 碰撞處理區新增
     if tsmc.check_collision(player_rect):
@@ -156,6 +223,8 @@ while running:
     hud.draw_score(game_surface, score)
     hud.draw_lives(game_surface, lives)
     hud.draw_emblems(game_surface)
+    # 最後畫上墨魚汁效果（蓋在遊戲畫面上）
+    ink_overlay.draw(game_surface)
 
     # Show TSMC invincible/double score timer hints (English)
     if tsmc.is_invincible():
