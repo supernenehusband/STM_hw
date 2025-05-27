@@ -13,6 +13,7 @@ def start_ble_listener(cmd_queue, connected_event):
 
     threading.Thread(target=run_ble_loop, daemon=True).start()
 
+
 async def ble_loop(cmd_queue, connected_event):
     while True:
         print("🔍 Scanning for BLE devices...")
@@ -25,7 +26,8 @@ async def ble_loop(cmd_queue, connected_event):
                 break
 
         if not target:
-            print(f"❌ Device '{TARGET_NAME}' not found. Retrying in 3 seconds...")
+            print(
+                f"❌ Device '{TARGET_NAME}' not found. Retrying in 3 seconds...")
             await asyncio.sleep(2)
             continue  # 重新進入 while-loop
 
@@ -42,7 +44,7 @@ async def ble_loop(cmd_queue, connected_event):
                 def handle_notify(_, data):
                     try:
                         cmd = data.decode("utf-8").strip().lower()
-                        if cmd in ("up", "down", "left", "right"):
+                        if cmd in ("up", "down", "left", "right", "shake"):
                             print(f"[BLE CMD] {cmd}")
                             cmd_queue.put(cmd)
                     except Exception as e:

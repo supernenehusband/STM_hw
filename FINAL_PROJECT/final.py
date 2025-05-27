@@ -20,23 +20,29 @@ game_started = False
 ble_connected = False
 ble_queue = queue.Queue()
 connected_event = threading.Event()
-threading.Thread(target=start_ble_listener, args=(ble_queue, connected_event), daemon=True).start()
+threading.Thread(target=start_ble_listener, args=(
+    ble_queue, connected_event), daemon=True).start()
 
 while not game_started:
     screen.blit(connect_bg, (0, 0))
 
     # 如果 BLE 傳入任何訊息，視為已連線
-    if not ble_connected and not ble_queue.empty():
-        peek = ble_queue.queue[0]
-        if peek == "connected":
-            ble_connected = True
+    # if not ble_connected and not ble_queue.empty():
+    #     peek = ble_queue.queue[0]
+    #     if peek:
+    #         ble_connected = True
+
+    if connected_event.is_set():
+        ble_connected = True
 
     if not ble_connected:
-        text = wait_font.render("Connecting to BLE device...", True, (255, 255, 255))
+        text = wait_font.render(
+            "Connecting to BLE device...", True, (255, 255, 255))
         screen.blit(text, (100, 220))
     else:
         text1 = wait_font.render("Connected to BlueNRG!", True, (0, 255, 0))
-        text2 = wait_font.render("Shake to start the game", True, (255, 255, 0))
+        text2 = wait_font.render(
+            "Shake to start the game", True, (255, 255, 0))
         screen.blit(text1, (120, 180))
         screen.blit(text2, (100, 240))
 
@@ -77,7 +83,8 @@ double_score_timer = 0
 multiplier = 1.0
 
 # 初始化 HUD 與螢幕震動
-hud = HUD(font, heart_full_image, heart_empty_image, emblem_sprite, emblem_gray_sprite, lives)
+hud = HUD(font, heart_full_image, heart_empty_image,
+          emblem_sprite, emblem_gray_sprite, lives)
 shake = ScreenShake(duration=10, intensity=5)
 ink_overlay = InkOverlayEffect(screen.get_size())
 
@@ -122,7 +129,7 @@ while running:
     # 建立畫布並畫出背景與跑道
     game_surface = pygame.Surface(screen.get_size())
     game_surface.blit(background, (0, 0))
-    
+
     pygame.draw.rect(game_surface, (100, 100, 100), (150, 0, 300, 400))
 
     pygame.draw.line(game_surface, (255, 255, 255), (250, 0), (250, 400), 3)
@@ -213,7 +220,8 @@ while running:
     # 遊戲結束條件
     if lives <= 0:
         pygame.quit()
-        os.execv(sys.executable, [sys.executable, 'FINAL_PROJECT/game_over.py', str(score)])
+        os.execv(sys.executable, [sys.executable,
+                 'FINAL_PROJECT/game_over.py', str(score)])
 
     # 畫出所有遊戲元素
     player.draw(game_surface)
@@ -234,7 +242,8 @@ while running:
 
     if double_score_timer > 0:
         bonus_sec = double_score_timer // 30
-        bonus_text = font.render(f"Double Score: {bonus_sec}s", True, (0, 255, 0))
+        bonus_text = font.render(
+            f"Double Score: {bonus_sec}s", True, (0, 255, 0))
         game_surface.blit(bonus_text, (10, 70))
 
     # 顯示畫面與震動偏移
