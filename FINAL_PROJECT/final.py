@@ -66,15 +66,17 @@ while not game_started:
 lanes = [200, 300, 400]
 
 # 修改 Player 類別，新增 target_x 屬性，並調整 move_with_strength 與 update 方法
+
+
 class PlayerModified(Player):
     def __init__(self, lanes, sprite):
         super().__init__(lanes, sprite)
         self.target_x = self.x
 
     def move_with_strength(self, direction, strength):
-        # 強度 750~2000 線性映射到 0~50
+        # 強度 750~2000 線性映射到 0~100
         norm = max(0.0, min(1.0, (strength - 750) / (2000 - 750)))
-        move_distance = norm * 50
+        move_distance = norm * 100
         if direction == 'l':
             self.target_x = max(self.lanes[0], self.x - move_distance)
         elif direction == 'r':
@@ -86,6 +88,7 @@ class PlayerModified(Player):
             self.x += (self.target_x - self.x) * 0.2
         else:
             self.x = self.target_x
+
 
 # 初始化遊戲物件
 player = PlayerModified(lanes, player_sprite)

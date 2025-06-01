@@ -49,7 +49,7 @@ while not game_started:
         try:
             if not ble_queue.empty():
                 cmd = ble_queue.get_nowait()
-                if cmd in ("up", "down", "left", "right"):
+                if cmd.startswith(("u", "d", "l", "r", "shake")):
                     game_started = True
         except queue.Empty:
             pass
@@ -65,8 +65,33 @@ while not game_started:
 # 跑道位置
 lanes = [200, 300, 400]
 
+# 修改 Player 類別，新增 target_x 屬性，並調整 move_with_strength 與 update 方法
+
+
+class PlayerModified(Player):
+    def __init__(self, lanes, sprite):
+        super().__init__(lanes, sprite)
+        self.target_x = self.x
+
+    def move_with_strength(self, direction, strength):
+        # 強度 750~2000 線性映射到 0~50
+        norm = max(0.0, min(1.0, (strength - 750) / (2000 - 750)))
+        move_distance = norm * 100
+        if direction == 'l':
+            self.target_x = max(self.lanes[0], self.x - move_distance)
+        elif direction == 'r':
+            self.target_x = min(self.lanes[-1], self.x + move_distance)
+
+    def update(self):
+        super().update()
+        if abs(self.x - self.target_x) > 1:
+            self.x += (self.target_x - self.x) * 0.2
+        else:
+            self.x = self.target_x
+
+
 # 初始化遊戲物件
-player = Player(lanes, player_sprite)
+player = PlayerModified(lanes, player_sprite)
 enemy = Enemy(lanes, enemy_sprite, trap_sprite)
 trap_manager = TrapUFOManager(
     lanes, trap_sprite, ufo_sprite, emblem_sprite, aplus_sprite
@@ -142,6 +167,7 @@ while running:
     try:
         while not ble_queue.empty():
             cmd = ble_queue.get_nowait()
+            print(f"[BLE Received] {cmd}")
             if cmd == "up":
                 player.jump()
             elif cmd == "down":
@@ -152,25 +178,48 @@ while running:
                 player.move_right()
             elif cmd == "shake":
                 ink_overlay.receive_shake()
+            elif cmd.startswith("u"):
+                try:
+                    _ = int(cmd[1:])  # 嘗試解析數字，確保是合法格式
+                    player.jump()
+                except ValueError:
+                    pass
+            elif cmd.startswith("d"):
+                try:
+                    _ = int(cmd[1:])
+                    player.slide()
+                except ValueError:
+                    pass
+            elif cmd.startswith("l") or cmd.startswith("r"):
+                direction = cmd[0]
+                try:
+                    strength = int(cmd[1:])
+                    player.move_with_strength(direction, strength)
+                except ValueError:
+                    pass
     except queue.Empty:
         pass
 
-    # 處理鍵盤與退出事件
+    # 處理鍵盤與退出事件 (方向鍵模擬 BLE 指令格式)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            if event.key == pygame.K_LEFT:
-                player.move_left()
-            if event.key == pygame.K_RIGHT:
-                player.move_right()
-            if event.key == pygame.K_UP:
-                player.jump()
-            if event.key == pygame.K_DOWN:
-                player.slide()
-            if event.key == pygame.K_s:
+            elif event.key == pygame.K_LEFT:
+                strength = random.randint(750, 2000)
+                ble_queue.put(f"l{strength}")
+            elif event.key == pygame.K_RIGHT:
+                strength = random.randint(750, 2000)
+                ble_queue.put(f"r{strength}")
+            elif event.key == pygame.K_UP:
+                strength = random.randint(750, 2000)
+                ble_queue.put(f"u{strength}")
+            elif event.key == pygame.K_DOWN:
+                strength = random.randint(750, 2000)
+                ble_queue.put(f"d{strength}")
+            elif event.key == pygame.K_s:
                 ink_overlay.receive_shake()
 
     # 更新遊戲邏輯
@@ -190,17 +239,17 @@ while running:
         # 判斷小怪碰撞（需要跳或滑）
         if enemy.active and player_rect.colliderect(enemy.get_rect()):
             if enemy.height == 'down' and not player.is_jumping:
-                # lives -= 1
+                lives -= 1
                 enemy.active = False
                 shake.start()
             if enemy.height == 'up' and not player.is_sliding:
-                # lives -= 1
+                lives -= 1
                 enemy.active = False
                 shake.start()
 
         # 判斷是否踩到陷阱
         if trap_manager.get_collided(player_rect, player.is_jumping, player.is_sliding):
-            # lives -= 1
+            lives -= 1
             shake.start()
 
     # 校徽撿取檢查與加分
