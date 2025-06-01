@@ -45,8 +45,9 @@ async def ble_loop(cmd_queue, connected_event):
                     try:
                         cmd = data.decode("utf-8").strip().lower()
                         print(f"[BLE CMD] {cmd}")
-                        if cmd in ("up", "down", "left", "right", "shake"):
-                            # print(f"[BLE CMD] {cmd}")
+                        if cmd.startswith(("u", "d", "l", "r")) and cmd[1:].isdigit():
+                            cmd_queue.put(cmd)
+                        elif cmd == "shake":
                             cmd_queue.put(cmd)
                     except Exception as e:
                         print(f"[ERROR] Bad data: {e}")

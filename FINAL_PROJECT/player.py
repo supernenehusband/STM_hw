@@ -23,6 +23,26 @@ class Player:
         if current_lane < 2:
             self.x = self.lanes[current_lane + 1]
 
+    def move_with_strength(self, direction, strength):
+        # 移動強度轉換為距離：750 ~ 2000 對應 1/3 格 ~ 2 格寬
+        min_val = 750
+        max_val = 2000
+        min_move = 100 / 3  # 約 33.3 pixels
+        max_move = 200      # 約兩格
+
+        # 線性插值計算距離
+        norm = max(0.0, min(1.0, (strength - min_val) / (max_val - min_val)))
+        move_dist = min_move + norm * (max_move - min_move)
+
+        # 更新 x 座標
+        if direction == 'r':
+            self.x += move_dist
+        elif direction == 'l':
+            self.x -= move_dist
+
+        # 限制在畫面邊界範圍（例如跑道從 x=150 到 x=450）
+        self.x = max(150, min(self.x, 450))
+
     def jump(self):
         if not self.is_jumping:
             self.is_jumping = True
