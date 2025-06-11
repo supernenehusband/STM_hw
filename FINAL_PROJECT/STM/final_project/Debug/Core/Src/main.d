@@ -70,7 +70,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_aci.h \
  ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_server.h \
  ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_def.h \
- ../Middlewares/ST/BlueNRG-MS/includes/compiler.h
+ ../Middlewares/ST/BlueNRG-MS/includes/compiler.h \
+ ../Drivers/CMSIS/DSP/Include/arm_math.h \
+ ../Drivers/CMSIS/Include/cmsis_compiler.h
 ../Core/Inc/main.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 ../Core/Inc/stm32l4xx_hal_conf.h:
@@ -145,3 +147,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_gatt_server.h:
 ../Middlewares/ST/BlueNRG-MS/includes/bluenrg_def.h:
 ../Middlewares/ST/BlueNRG-MS/includes/compiler.h:
+../Drivers/CMSIS/DSP/Include/arm_math.h:
+../Drivers/CMSIS/Include/cmsis_compiler.h:

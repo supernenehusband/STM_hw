@@ -72,7 +72,7 @@ main-build: hw4_final.elf secondary-outputs
 
 # Tool invocations
 hw4_final.elf hw4_final.map: $(OBJS) $(USER_OBJS) C:\Users\user\STM32CubeIDE\workspace_1.18.1\hw4_final\STM32L475VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "hw4_final.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\user\STM32CubeIDE\workspace_1.18.1\hw4_final\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hw4_final.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "hw4_final.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\user\STM32CubeIDE\workspace_1.18.1\hw4_final\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hw4_final.map" -Wl,--gc-sections -static -L"C:\Users\user\STM32CubeIDE\workspace_1.18.1\hw4_final\Drivers\CMSIS\Lib\GCC" -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -25,6 +25,7 @@
 #else
 #define PACKED
 #endif /* __GNUC__ */
+typedef	uint8_t	tBDAddr[6];
 
 /** 
  * @addtogroup HIGH_LEVEL_INTERFACE HIGH_LEVEL_INTERFACE
@@ -194,7 +195,7 @@ tBleStatus aci_gap_set_non_discoverable(void);
  *  							@arg @ref AD_TYPE_16_BIT_SERV_UUID
  *  							@arg @ref AD_TYPE_16_BIT_SERV_UUID_CMPLT_LIST
  *  							@arg @ref AD_TYPE_128_BIT_SERV_UUID
- *  							@arg @ref AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST
+ *  						T	@arg @ref AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST
  * @param  SlaveConnIntervMin Slave connection interval minimum value suggested by Peripheral.
  * 							 If SlaveConnIntervMin and SlaveConnIntervMax are not 0x0000,
  * 							 Slave Connection Interval Range AD structure will be added in advertising

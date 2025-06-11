@@ -177,6 +177,7 @@ tBleStatus aci_gap_set_discoverable(uint8_t AdvType, uint16_t AdvIntervMin, uint
                              const char *LocalName, uint8_t ServiceUUIDLen, uint8_t* ServiceUUIDList,
                              uint16_t SlaveConnIntervMin, uint16_t SlaveConnIntervMax)
 {
+//	return BLE_STATUS_INVALID_PARAMS;
   struct hci_request rq;
   uint8_t status;    
   uint8_t buffer[40];
@@ -234,7 +235,9 @@ tBleStatus aci_gap_set_discoverable(uint8_t AdvType, uint16_t AdvIntervMin, uint
     return BLE_STATUS_TIMEOUT;
 
   if (status) {
-    return status;
+//	  return BLE_STATUS_TIMEOUT;
+	  return status;
+
   }
 
   return 0;
